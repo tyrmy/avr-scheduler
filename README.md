@@ -2,6 +2,8 @@
 
 A lightweight, cooperative round-robin scheduler for AVR microcontrollers written in C. This scheduler enables multitasking on resource-constrained AVR platforms like Arduino Uno (ATmega328P).
 
+Note that the debug_example.c uses around 86% of the availabel ram on atmega328p. The custom task control blocks fill the memory fast. For this reason bare metal is more optimal for an mcu like avr.
+
 ## Hardware Requirements
 
 - AVR microcontroller (ATmega328P, ATmega2560, etc.)
