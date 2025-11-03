@@ -1,0 +1,17 @@
+# Build artifacts
+*.o
+*.elf
+*.hex
+*.eep
+*.lst
+*.lss
+*.map
+*.sym
+
+# Executables
+host_test
+scheduler_test
+
+# AVR toolchain artifacts
+*.d
+

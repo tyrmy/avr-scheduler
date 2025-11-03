@@ -43,6 +43,7 @@ void scheduler_init(void) {
 
 // initialize a task's stack
 static uint8_t* init_stack(uint8_t *stack_top, task_func_t task_function) {
+#ifndef HOST_TEST_BUILD
     uint16_t func_addr = (uint16_t)task_function;
     
     // simulate what the stack looks like after a context save
@@ -64,6 +65,15 @@ static uint8_t* init_stack(uint8_t *stack_top, task_func_t task_function) {
     for (uint8_t i = 0; i < 31; i++) {
         *stack_top-- = 0x00;
     }
+#else
+    // Host test build - just initialize the stack to something valid
+    // Real stack initialization only works on AVR hardware
+    (void)task_function;  // Suppress unused parameter warning
+    (void)task_exit;      // Suppress unused function warning
+    for (uint8_t i = 0; i < 35; i++) {
+        *stack_top-- = 0x00;
+    }
+#endif
     
     return stack_top;
 }
@@ -116,6 +126,7 @@ void scheduler_start(void) {
     // enable global interrupts
     sei();
     
+#ifndef HOST_TEST_BUILD
     // load the first task's context and start running
     // this is done by manually restoring the first task's stack
     uint8_t *sp = tasks[current_task].stack_pointer;
@@ -169,6 +180,11 @@ void scheduler_start(void) {
     
     // should never reach here
     while(1);
+#else
+    // Host test build - scheduler_start doesn't actually run tasks
+    // This is just for testing initialization logic
+    (void)tasks;  // Suppress unused variable warning
+#endif
 }
 
 // timer interrupt - triggers context switch
@@ -217,6 +233,11 @@ void scheduler_resume_task(uint8_t task_id) {
 
 // voluntary yield
 void scheduler_yield(void) {
+    // early return if no tasks
+    if (task_count == 0) {
+        return;
+    }
+    
 #ifdef SCHEDULER_DEBUG
     // track voluntary yields
     debug_stats.voluntary_yields++;
